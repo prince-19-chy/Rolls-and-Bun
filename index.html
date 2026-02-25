@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Royal Rolls & Buns</title>
+  <!-- Styles will be placed inline for single file SPA -->
+  <style>
+    /* Global reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #111; color: #eee; }
+
+    /* Premium typography */
+    h1, h2, h3, h4, h5, h6 { font-family: 'Merriweather', serif; }
+
+    /* Utility classes */
+    .hidden { display: none !important; }
+
+    /* Container for SPA */
+    #app { position: relative; min-height: 100vh; }
+
+    /* Navigation bar */
+    #navbar { background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; z-index:100; }
+    #navbar h1 { color: gold; font-size: 1.5rem; text-shadow: 0 0 8px gold; }
+    #navbar button { background: none; border: 2px solid gold; color: gold; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; transition: background 0.3s; }
+    #navbar button:hover { background: gold; color: #111; }
+
+    /* Main content sections */
+    .section { padding: 2rem; }
+
+    /* Glass cards grid for menu */
+    #menu { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 1.5rem; }
+    .menu-item { background: rgba(255,255,255,0.1); border-radius: 16px; backdrop-filter: blur(10px); padding: 1rem; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.3s; }
+    .menu-item:hover { transform: translateY(-6px) scale(1.02); }
+    .menu-item img { width: 100%; border-radius: 12px; }
+    .menu-item .name { margin: 0.5rem 0; font-weight: bold; font-size: 1.1rem; color: gold; }
+    .menu-item .price { margin-bottom: 0.5rem; }
+    .menu-item button { background: gold; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; transition: opacity 0.3s; }
+    .menu-item button:hover { opacity: 0.8; }
+
+    /* Cart drawer */
+    #cartDrawer { position: fixed; right: -400px; top: 0; height: 100%; width: 350px; background: rgba(0,0,0,0.9); backdrop-filter: blur(12px); color: #eee; transition: right 0.4s; padding: 2rem; overflow-y: auto; z-index: 200; }
+    #cartDrawer.open { right: 0; }
+    #cartDrawer h2 { margin-bottom: 1rem; color: gold; }
+    #cartDrawer .cart-item { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+    #cartDrawer .cart-item .qty { width: 40px; text-align: center; }
+    #cartDrawer .controls { display: flex; gap: 0.5rem; }
+    #cartDrawer button { background: gold; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
+    #cartDrawer .total { font-weight: bold; margin-top: 1rem; }
+
+    /* Modal */
+    #customerModal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index:300; }
+    #customerModal .modal-content { background: rgba(255,255,255,0.1); backdrop-filter: blur(12px); padding:2rem; border-radius: 12px; width: 90%; max-width:400px; color:#eee; }
+    #customerModal input { width: 100%; padding: 0.5rem; margin-bottom: 1rem; border-radius: 6px; border: 1px solid #ccc; }
+    #customerModal button { background: gold; width: 100%; padding: 0.6rem; border:none; border-radius: 8px; cursor: pointer; }
+
+    /* Dashboard & admin toggles etc */
+    #dashboard, #adminPanel { position: absolute; top:60px; left:0; width:100%; height: calc(100% - 60px); background: rgba(0,0,0,0.9); color:#eee; padding:2rem; overflow:auto; display:none; }
+    #dashboard.active, #adminPanel.active { display:block; }
+    .order-group { margin-bottom:2rem; }
+    .order-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding:1rem; border-radius:12px; margin-bottom:1rem; }
+    .order-card .status-buttons { margin-top:0.5rem; display:flex; gap:0.5rem; }
+    .order-card button { background: gold; border:none; padding:0.4rem 0.8rem; border-radius:6px; cursor:pointer; }
+
+    /* Admin form */
+    #adminPanel .form-group { margin-bottom:1rem; }
+    #adminPanel input, #adminPanel textarea { width:100%; padding:0.5rem; border-radius:6px; border:1px solid #ccc; }
+    #adminPanel .menu-list { margin-top:1rem; }
+    #adminPanel .menu-list .menu-row { display:flex; justify-content:space-between; margin-bottom:0.5rem; }
+    #adminPanel .menu-row button { background:red; padding:0.2rem 0.5rem; border:none; border-radius:4px; }
+
+  </style>
+</head>
+<body>
+  <div id="app">
+    <nav id="navbar">
+      <h1>Royal Rolls & Buns</h1>
+      <div>
+        <button id="viewMenuBtn">Menu</button>
+        <button id="viewDashboardBtn">Dashboard</button>
+        <button id="viewAdminBtn">Admin</button>
+        <button id="cartBtn">Cart (<span id="cartCount">0</span>)</button>
+      </div>
+    </nav>
+
+    <section id="menuSection" class="section">
+      <div id="menu"></div>
+    </section>
+
+    <!-- cart drawer -->
+    <aside id="cartDrawer">
+      <h2>Your Order</h2>
+      <div id="cartItems"></div>
+      <div class="total">Total: $<span id="cartTotal">0.00</span></div>
+      <button id="confirmOrderBtn">Confirm Order</button>
+    </aside>
+
+    <!-- customer modal -->
+    <div id="customerModal" class="hidden">
+      <div class="modal-content">
+        <h3>Enter Details</h3>
+        <input type="text" id="tableInput" placeholder="Table Number" />
+        <input type="text" id="nameInput" placeholder="Customer Name" />
+        <button id="startOrderBtn">Start Ordering</button>
+      </div>
+    </div>
+
+    <!-- dashboard -->
+    <div id="dashboard">
+      <h2>Kitchen Dashboard</h2>
+      <div class="order-group" data-status="Pending"></div>
+      <div class="order-group" data-status="Preparing"></div>
+      <div class="order-group" data-status="Ready"></div>
+      <div class="order-group" data-status="Completed"></div>
+    </div>
+
+    <!-- admin panel -->
+    <div id="adminPanel">
+      <h2>Admin Panel</h2>
+      <div class="form-group">
+        <input type="text" id="adminItemName" placeholder="Item Name" />
+      </div>
+      <div class="form-group">
+        <input type="text" id="adminItemPrice" placeholder="Price" />
+      </div>
+      <div class="form-group">
+        <textarea id="adminItemDesc" placeholder="Description"></textarea>
+      </div>
+      <button id="adminAddBtn">Add Item</button>
+      <div class="menu-list"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // JavaScript logic sections
+    (function(){
+      // data structures & storage
+      const STORAGE_MENU_KEY = 'rrb_menu';
+      const STORAGE_ORDERS_KEY = 'rrb_orders';
+
+      let menu = [];
+      let orders = [];
+      let cart = [];
+      let currentCustomer = null;
+
+      // init
+      function init(){
+        loadMenu();
+        loadOrders();
+        renderMenu();
+        bindEvents();
+        showCustomerModal();
+      }
+
+      function loadMenu(){
+        const stored = localStorage.getItem(STORAGE_MENU_KEY);
+        if(stored){ menu = JSON.parse(stored); }
+        else { // default items
+          menu = [
+            {id:1,name:'Royal Roll',price:12.99,desc:'Deluxe roll with gold leaf.'},
+            {id:2,name:'Buns Supreme',price:9.49,desc:'Classic buns with premium butter.'}
+          ];
+          localStorage.setItem(STORAGE_MENU_KEY, JSON.stringify(menu));
+        }
+      }
+
+      function saveMenu(){ localStorage.setItem(STORAGE_MENU_KEY, JSON.stringify(menu)); }
+
+      function loadOrders(){
+        const stored = localStorage.getItem(STORAGE_ORDERS_KEY);
+        if(stored){ orders = JSON.parse(stored); }
+      }
+
+      function saveOrders(){ localStorage.setItem(STORAGE_ORDERS_KEY, JSON.stringify(orders)); }
+
+      // rendering helpers
+      function renderMenu(){
+        const container = document.getElementById('menu');
+        container.innerHTML = '';
+        menu.forEach(item => {
+          const card = document.createElement('div');
+          card.className='menu-item';
+          card.innerHTML = `
+            <img src="https://via.placeholder.com/300?text=${encodeURIComponent(item.name)}" alt="${item.name}" />
+            <div class="name">${item.name}</div>
+            <div class="price">$${item.price.toFixed(2)}</div>
+            <button data-id="${item.id}">Add</button>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      function renderCart(){
+        const itemsDiv = document.getElementById('cartItems');
+        itemsDiv.innerHTML = '';
+        let total=0;
+        cart.forEach(entry=>{
+          const item = menu.find(m=>m.id===entry.id);
+          const row = document.createElement('div');
+          row.className='cart-item';
+          row.innerHTML = `
+            <div>${item.name}</div>
+            <div class="controls">
+              <button data-action="dec" data-id="${item.id}">-</button>
+              <div class="qty">${entry.qty}</div>
+              <button data-action="inc" data-id="${item.id}">+</button>
+            </div>
+            <div>$${(item.price*entry.qty).toFixed(2)}</div>
+          `;
+          itemsDiv.appendChild(row);
+          total += item.price * entry.qty;
+        });
+        document.getElementById('cartTotal').textContent = total.toFixed(2);
+        document.getElementById('cartCount').textContent = cart.reduce((a,c)=>a+c.qty,0);
+      }
+
+      function openCart(){ document.getElementById('cartDrawer').classList.add('open'); }
+      function closeCart(){ document.getElementById('cartDrawer').classList.remove('open'); }
+
+      function addToCart(id){
+        const existing = cart.find(c=>c.id===id);
+        if(existing) existing.qty++;
+        else cart.push({id,qty:1});
+        renderCart();
+      }
+
+      function changeQty(id,delta){
+        const entry = cart.find(c=>c.id===id);
+        if(!entry) return;
+        entry.qty += delta;
+        if(entry.qty<=0) cart = cart.filter(c=>c.id!==id);
+        renderCart();
+      }
+
+      function confirmOrder(){
+        if(cart.length===0) return;
+        const total = cart.reduce((sum,e)=>{
+          const it = menu.find(m=>m.id===e.id);
+          return sum + it.price*e.qty;
+        },0);
+        const order = {
+          id: Date.now(),
+          table: currentCustomer.table,
+          customer: currentCustomer.name,
+          items: [...cart],
+          total,
+          status: 'Pending',
+          timestamp: new Date().toISOString()
+        };
+        orders.push(order);
+        saveOrders();
+        cart=[];
+        renderCart();
+        closeCart();
+        alert('Order placed!');
+        renderDashboard();
+      }
+
+      function renderDashboard(){
+        const groups = document.querySelectorAll('.order-group');
+        groups.forEach(g=> g.innerHTML='');
+        orders.forEach(o=>{
+          const card = document.createElement('div');
+          card.className='order-card';
+          card.innerHTML = `
+            <div><strong>#${o.id}</strong> ${o.customer} (Table ${o.table}) - $${o.total.toFixed(2)}</div>
+            <div>Status: <span>${o.status}</span></div>
+            <div class="status-buttons">
+              ${['Pending','Preparing','Ready','Completed'].map(s=>`<button data-id="${o.id}" data-status="${s}">${s}</button>`).join('')}
+            </div>
+          `;
+          document.querySelector(`.order-group[data-status="${o.status}"]`).appendChild(card);
+        });
+      }
+
+      function updateOrderStatus(id,newStatus){
+        const ord = orders.find(o=>o.id==id);
+        if(ord){ ord.status=newStatus; saveOrders(); renderDashboard(); }
+      }
+
+      function renderAdminMenu(){
+        const list = document.querySelector('#adminPanel .menu-list');
+        list.innerHTML='';
+        menu.forEach(it=>{
+          const row = document.createElement('div');
+          row.className='menu-row';
+          row.innerHTML = `<span>${it.name} ($${it.price.toFixed(2)})</span><button data-id="${it.id}">Delete</button>`;
+          list.appendChild(row);
+        });
+      }
+
+      function addMenuItem(){
+        const name = document.getElementById('adminItemName').value.trim();
+        const price = parseFloat(document.getElementById('adminItemPrice').value);
+        const desc = document.getElementById('adminItemDesc').value.trim();
+        if(!name||isNaN(price)) return;
+        menu.push({ id: Date.now(), name, price, desc });
+        saveMenu();
+        renderMenu(); renderAdminMenu();
+      }
+
+      function deleteMenuItem(id){
+        menu = menu.filter(m=>m.id!=id);
+        saveMenu();
+        renderMenu(); renderAdminMenu();
+      }
+
+      function bindEvents(){
+        document.getElementById('menu').addEventListener('click', e=>{
+          if(e.target.tagName==='BUTTON') addToCart(Number(e.target.dataset.id));
+        });
+        document.getElementById('cartBtn').addEventListener('click', openCart);
+        document.getElementById('cartDrawer').addEventListener('click', e=>{
+          if(e.target.dataset.action){ changeQty(Number(e.target.dataset.id), e.target.dataset.action==='inc'?1:-1); }
+        });
+        document.getElementById('confirmOrderBtn').addEventListener('click', confirmOrder);
+        document.getElementById('startOrderBtn').addEventListener('click', ()=>{
+          const table = document.getElementById('tableInput').value.trim();
+          const name = document.getElementById('nameInput').value.trim();
+          if(table && name){ currentCustomer={table,name}; document.getElementById('customerModal').classList.add('hidden'); }
+        });
+        document.getElementById('viewDashboardBtn').addEventListener('click', ()=>{
+          document.getElementById('dashboard').classList.toggle('active'); renderDashboard();
+        });
+        document.getElementById('viewAdminBtn').addEventListener('click', ()=>{
+          document.getElementById('adminPanel').classList.toggle('active'); renderAdminMenu();
+        });
+        document.getElementById('adminAddBtn').addEventListener('click', addMenuItem);
+        document.querySelector('#adminPanel .menu-list').addEventListener('click', e=>{
+          if(e.target.tagName==='BUTTON') deleteMenuItem(Number(e.target.dataset.id));
+        });
+        document.getElementById('dashboard').addEventListener('click', e=>{
+          if(e.target.tagName==='BUTTON'){
+            updateOrderStatus(Number(e.target.dataset.id), e.target.dataset.status);
+          }
+        });
+      }
+
+      function showCustomerModal(){ document.getElementById('customerModal').classList.remove('hidden'); }
+
+      // initialize app
+      init();
+    })();
+  </script>
+</body>
+</html>
