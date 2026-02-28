@@ -1,113 +1,531 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Royal Rolls & Buns</title>
-  <!-- Styles will be placed inline for single file SPA -->
-  <style>
-    /* Global reset */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #111; color: #eee; }
-
-    /* Premium typography */
-    h1, h2, h3, h4, h5, h6 { font-family: 'Merriweather', serif; }
-
-    /* Utility classes */
-    .hidden { display: none !important; }
-
-    /* Container for SPA */
-    #app { position: relative; min-height: 100vh; }
-
-    /* Navigation bar */
-    #navbar { background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; z-index:100; }
-    #navbar h1 { color: gold; font-size: 1.5rem; text-shadow: 0 0 8px gold; }
-    #navbar button { background: none; border: 2px solid gold; color: gold; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; transition: background 0.3s; }
-    #navbar button:hover { background: gold; color: #111; }
-
-    /* Main content sections */
-    .section { padding: 2rem; }
-
-    /* Glass cards grid for menu */
-    #menu { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 1.5rem; }
-    .menu-item { background: rgba(255,255,255,0.1); border-radius: 16px; backdrop-filter: blur(10px); padding: 1rem; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.3s; }
-    .menu-item:hover { transform: translateY(-6px) scale(1.02); }
-    .menu-item img { width: 100%; border-radius: 12px; }
-    .menu-item .name { margin: 0.5rem 0; font-weight: bold; font-size: 1.1rem; color: gold; }
-    .menu-item .price { margin-bottom: 0.5rem; }
-    .menu-item button { background: gold; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; transition: opacity 0.3s; }
-    .menu-item button:hover { opacity: 0.8; }
-
-    /* Cart drawer */
-    #cartDrawer { position: fixed; right: -400px; top: 0; height: 100%; width: 350px; background: rgba(0,0,0,0.9); backdrop-filter: blur(12px); color: #eee; transition: right 0.4s; padding: 2rem; overflow-y: auto; z-index: 200; }
-    #cartDrawer.open { right: 0; }
-    #cartDrawer h2 { margin-bottom: 1rem; color: gold; }
-    #cartDrawer .cart-item { display: flex; justify-content: space-between; margin-bottom: 1rem; }
-    #cartDrawer .cart-item .qty { width: 40px; text-align: center; }
-    #cartDrawer .controls { display: flex; gap: 0.5rem; }
-    #cartDrawer button { background: gold; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
-    #cartDrawer .total { font-weight: bold; margin-top: 1rem; }
-
-    /* Modal */
-    #customerModal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index:300; }
-    #customerModal .modal-content { background: rgba(255,255,255,0.1); backdrop-filter: blur(12px); padding:2rem; border-radius: 12px; width: 90%; max-width:400px; color:#eee; }
-    #customerModal input { width: 100%; padding: 0.5rem; margin-bottom: 1rem; border-radius: 6px; border: 1px solid #ccc; }
-    #customerModal button { background: gold; width: 100%; padding: 0.6rem; border:none; border-radius: 8px; cursor: pointer; }
-
-    /* Dashboard & admin toggles etc */
-    #dashboard, #adminPanel { position: absolute; top:60px; left:0; width:100%; height: calc(100% - 60px); background: rgba(0,0,0,0.9); color:#eee; padding:2rem; overflow:auto; display:none; }
-    #dashboard.active, #adminPanel.active { display:block; }
-    .order-group { margin-bottom:2rem; }
-    .order-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding:1rem; border-radius:12px; margin-bottom:1rem; }
-    .order-card .status-buttons { margin-top:0.5rem; display:flex; gap:0.5rem; }
-    .order-card button { background: gold; border:none; padding:0.4rem 0.8rem; border-radius:6px; cursor:pointer; }
-
-    /* Admin form */
-    #adminPanel .form-group { margin-bottom:1rem; }
-    #adminPanel input, #adminPanel textarea { width:100%; padding:0.5rem; border-radius:6px; border:1px solid #ccc; }
-    #adminPanel .menu-list { margin-top:1rem; }
-    #adminPanel .menu-list .menu-row { display:flex; justify-content:space-between; margin-bottom:0.5rem; }
-    #adminPanel .menu-row button { background:red; padding:0.2rem 0.5rem; border:none; border-radius:4px; }
-
-  </style>
+<meta charset="UTF-8">
+<title>Embers Beneath</title>
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    background: black;
+    font-family: monospace;
+    color: white;
+}
+canvas { display: block; }
+#textBox {
+    position: absolute;
+    bottom: 60px;
+    width: 100%;
+    text-align: center;
+    font-size: 24px;
+    opacity: 0;
+    transition: opacity 2s;
+    pointer-events: none;
+}
+#titleScreen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+button {
+    padding: 10px 20px;
+    background: black;
+    border: 1px solid white;
+    color: white;
+    cursor: pointer;
+}
+</style>
 </head>
 <body>
-  <div id="app">
-    <nav id="navbar">
-      <h1>Royal Rolls & Buns</h1>
-      <div>
-        <button id="viewMenuBtn">Menu</button>
-        <button id="viewDashboardBtn">Dashboard</button>
-        <button id="viewAdminBtn">Admin</button>
-        <button id="cartBtn">Cart (<span id="cartCount">0</span>)</button>
-      </div>
-    </nav>
 
-    <section id="menuSection" class="section">
-      <div id="menu"></div>
-    </section>
+<div id="titleScreen">
+    <h1>EMBERS BENEATH</h1>
+    <p>Press Start. Stay in the light.</p>
+    <button onclick="startGame()">START</button>
+</div>
 
-    <!-- cart drawer -->
-    <aside id="cartDrawer">
-      <h2>Your Order</h2>
-      <div id="cartItems"></div>
-      <div class="total">Total: $<span id="cartTotal">0.00</span></div>
-      <button id="confirmOrderBtn">Confirm Order</button>
-    </aside>
+<canvas id="game"></canvas>
+<div id="textBox"></div>
 
-    <!-- customer modal -->
-    <div id="customerModal" class="hidden">
-      <div class="modal-content">
-        <h3>Enter Details</h3>
-        <input type="text" id="tableInput" placeholder="Table Number" />
-        <input type="text" id="nameInput" placeholder="Customer Name" />
-        <button id="startOrderBtn">Start Ordering</button>
-      </div>
-    </div>
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const textBox = document.getElementById("textBox");
+const titleScreen = document.getElementById("titleScreen");
 
-    <!-- dashboard -->
-    <div id="dashboard">
-      <h2>Kitchen Dashboard</h2>
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let keys = {};
+let layer = 0;
+let ending = false;
+let shake = 0;
+let glitch = 0;
+let fogOffset = 0;
+
+const player = { x: canvas.width/2, y: canvas.height/2+120, size: 12, speed: 2.5 };
+const fire = { x: canvas.width/2, y: canvas.height/2, size: 30, flicker: 0 };
+const shadow = { x: 100, y: 100, visible: false };
+
+const messages = [
+    "You buried it here.",
+    "It never stopped watching.",
+    "You were not alone.",
+    "The fire was never warmth."
+];
+
+document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+
+function startGame(){
+    titleScreen.style.display = "none";
+    initAudio();
+    gameLoop();
+}
+
+function showText(msg){
+    textBox.innerText = msg;
+    textBox.style.opacity = 1;
+    setTimeout(()=> textBox.style.opacity = 0, 4000);
+}
+
+function distance(a,b){
+    return Math.hypot(a.x-b.x,a.y-b.y);
+}
+
+function update(){
+    if(ending) return;
+
+    if(keys["w"]) player.y -= player.speed;
+    if(keys["s"]) player.y += player.speed;
+    if(keys["a"]) player.x -= player.speed;
+    if(keys["d"]) player.x += player.speed;
+
+    if(distance(player,fire) < 70 && keys[" "]){
+        if(layer < 3){
+            layer++;
+            shake = layer === 3 ? 8 : 0;
+            glitch = 20;
+            shadow.visible = true;
+            showText(messages[layer-1]);
+        } else {
+            triggerEnding();
+        }
+        keys[" "] = false;
+    }
+
+    fire.flicker = Math.random()*4;
+    fogOffset += 0.2;
+
+    shadow.x += (player.x - shadow.x) * 0.0015 * layer;
+    shadow.y += (player.y - shadow.y) * 0.0015 * layer;
+
+    if(glitch > 0) glitch--;
+    if(shake > 0) shake *= 0.95;
+}
+
+function drawBackground(){
+    ctx.fillStyle = layer === 0 ? "#0a1a0a" : "#050b05";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    // Trees
+    ctx.fillStyle = "#102010";
+    for(let i=0;i<50;i++){
+        let x = (i*200)%canvas.width;
+        ctx.fillRect(x, canvas.height/2 - 150, 20, 300);
+    }
+
+    // Fog
+    ctx.fillStyle = "rgba(255,255,255,0.02)";
+    for(let i=0;i<canvas.width;i+=100){
+        ctx.fillRect(i + Math.sin((i+fogOffset)/50)*20,0,100,canvas.height);
+    }
+}
+
+function drawFire(){
+    if(layer >= 3) return;
+
+    let size = fire.size - layer*6 + fire.flicker;
+    let gradient = ctx.createRadialGradient(
+        fire.x, fire.y, 0,
+        fire.x, fire.y, size*3
+    );
+    gradient.addColorStop(0,"orange");
+    gradient.addColorStop(1,"transparent");
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(fire.x, fire.y, size*3, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.fillStyle = "orange";
+    ctx.arc(fire.x, fire.y, size, 0, Math.PI*2);
+    ctx.fill();
+}
+
+function drawPlayer(){
+    ctx.beginPath();
+    ctx.fillStyle = "white";
+    ctx.arc(player.x, player.y, player.size, 0, Math.PI*2);
+    ctx.fill();
+}
+
+function drawShadow(){
+    if(!shadow.visible) return;
+
+    ctx.globalAlpha = 0.8;
+    ctx.beginPath();
+    ctx.fillStyle = "black";
+    ctx.arc(shadow.x, shadow.y, 25, 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+}
+
+function drawLighting(){
+    ctx.fillStyle = "rgba(0,0,0,0.95)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    let lightRadius = 180 - layer*30;
+
+    let gradient = ctx.createRadialGradient(
+        player.x, player.y, 20,
+        player.x, player.y, lightRadius
+    );
+    gradient.addColorStop(0,"rgba(0,0,0,0)");
+    gradient.addColorStop(1,"rgba(0,0,0,0.95)");
+
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, lightRadius, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.globalCompositeOperation = "source-over";
+}
+
+function drawGlitch(){
+    if(glitch <= 0) return;
+    ctx.fillStyle = "rgba(255,255,255,0.05)";
+    for(let i=0;i<20;i++){
+        ctx.fillRect(Math.random()*canvas.width,
+                     Math.random()*canvas.height,
+                     200,2);
+    }
+}
+
+function triggerEnding(){
+    ending = true;
+    showText("The fire goes out.");
+    setTimeout(()=>{
+        showText("You were always alone.");
+    },4000);
+}
+
+function gameLoop(){
+    ctx.save();
+
+    if(shake>0){
+        ctx.translate(
+            (Math.random()-0.5)*shake,
+            (Math.random()-0.5)*shake
+        );
+    }
+
+    update();
+    drawBackground();
+    drawFire();
+    drawShadow();
+    drawPlayer();
+    drawLighting();
+    drawGlitch();
+
+    ctx.restore();
+    requestAnimationFrame(gameLoop);
+}
+
+function initAudio(){
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    oscillator.type = "sine";
+    <!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Embers Beneath</title>
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    background: black;
+    font-family: monospace;
+    color: white;
+}
+canvas { display: block; }
+#textBox {
+    position: absolute;
+    bottom: 60px;
+    width: 100%;
+    text-align: center;
+    font-size: 24px;
+    opacity: 0;
+    transition: opacity 2s;
+    pointer-events: none;
+}
+#titleScreen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+button {
+    padding: 10px 20px;
+    background: black;
+    border: 1px solid white;
+    color: white;
+    cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div id="titleScreen">
+    <h1>EMBERS BENEATH</h1>
+    <p>Press Start. Stay in the light.</p>
+    <button onclick="startGame()">START</button>
+</div>
+
+<canvas id="game"></canvas>
+<div id="textBox"></div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const textBox = document.getElementById("textBox");
+const titleScreen = document.getElementById("titleScreen");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let keys = {};
+let layer = 0;
+let ending = false;
+let shake = 0;
+let glitch = 0;
+let fogOffset = 0;
+
+const player = { x: canvas.width/2, y: canvas.height/2+120, size: 12, speed: 2.5 };
+const fire = { x: canvas.width/2, y: canvas.height/2, size: 30, flicker: 0 };
+const shadow = { x: 100, y: 100, visible: false };
+
+const messages = [
+    "You buried it here.",
+    "It never stopped watching.",
+    "You were not alone.",
+    "The fire was never warmth."
+];
+
+document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+
+function startGame(){
+    titleScreen.style.display = "none";
+    initAudio();
+    gameLoop();
+}
+
+function showText(msg){
+    textBox.innerText = msg;
+    textBox.style.opacity = 1;
+    setTimeout(()=> textBox.style.opacity = 0, 4000);
+}
+
+function distance(a,b){
+    return Math.hypot(a.x-b.x,a.y-b.y);
+}
+
+function update(){
+    if(ending) return;
+
+    if(keys["w"]) player.y -= player.speed;
+    if(keys["s"]) player.y += player.speed;
+    if(keys["a"]) player.x -= player.speed;
+    if(keys["d"]) player.x += player.speed;
+
+    if(distance(player,fire) < 70 && keys[" "]){
+        if(layer < 3){
+            layer++;
+            shake = layer === 3 ? 8 : 0;
+            glitch = 20;
+            shadow.visible = true;
+            showText(messages[layer-1]);
+        } else {
+            triggerEnding();
+        }
+        keys[" "] = false;
+    }
+
+    fire.flicker = Math.random()*4;
+    fogOffset += 0.2;
+
+    shadow.x += (player.x - shadow.x) * 0.0015 * layer;
+    shadow.y += (player.y - shadow.y) * 0.0015 * layer;
+
+    if(glitch > 0) glitch--;
+    if(shake > 0) shake *= 0.95;
+}
+
+function drawBackground(){
+    ctx.fillStyle = layer === 0 ? "#0a1a0a" : "#050b05";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    // Trees
+    ctx.fillStyle = "#102010";
+    for(let i=0;i<50;i++){
+        let x = (i*200)%canvas.width;
+        ctx.fillRect(x, canvas.height/2 - 150, 20, 300);
+    }
+
+    // Fog
+    ctx.fillStyle = "rgba(255,255,255,0.02)";
+    for(let i=0;i<canvas.width;i+=100){
+        ctx.fillRect(i + Math.sin((i+fogOffset)/50)*20,0,100,canvas.height);
+    }
+}
+
+function drawFire(){
+    if(layer >= 3) return;
+
+    let size = fire.size - layer*6 + fire.flicker;
+    let gradient = ctx.createRadialGradient(
+        fire.x, fire.y, 0,
+        fire.x, fire.y, size*3
+    );
+    gradient.addColorStop(0,"orange");
+    gradient.addColorStop(1,"transparent");
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(fire.x, fire.y, size*3, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.fillStyle = "orange";
+    ctx.arc(fire.x, fire.y, size, 0, Math.PI*2);
+    ctx.fill();
+}
+
+function drawPlayer(){
+    ctx.beginPath();
+    ctx.fillStyle = "white";
+    ctx.arc(player.x, player.y, player.size, 0, Math.PI*2);
+    ctx.fill();
+}
+
+function drawShadow(){
+    if(!shadow.visible) return;
+
+    ctx.globalAlpha = 0.8;
+    ctx.beginPath();
+    ctx.fillStyle = "black";
+    ctx.arc(shadow.x, shadow.y, 25, 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+}
+
+function drawLighting(){
+    ctx.fillStyle = "rgba(0,0,0,0.95)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    let lightRadius = 180 - layer*30;
+
+    let gradient = ctx.createRadialGradient(
+        player.x, player.y, 20,
+        player.x, player.y, lightRadius
+    );
+    gradient.addColorStop(0,"rgba(0,0,0,0)");
+    gradient.addColorStop(1,"rgba(0,0,0,0.95)");
+
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, lightRadius, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.globalCompositeOperation = "source-over";
+}
+
+function drawGlitch(){
+    if(glitch <= 0) return;
+    ctx.fillStyle = "rgba(255,255,255,0.05)";
+    for(let i=0;i<20;i++){
+        ctx.fillRect(Math.random()*canvas.width,
+                     Math.random()*canvas.height,
+                     200,2);
+    }
+}
+
+function triggerEnding(){
+    ending = true;
+    showText("The fire goes out.");
+    setTimeout(()=>{
+        showText("You were always alone.");
+    },4000);
+}
+
+function gameLoop(){
+    ctx.save();
+
+    if(shake>0){
+        ctx.translate(
+            (Math.random()-0.5)*shake,
+            (Math.random()-0.5)*shake
+        );
+    }
+
+    update();
+    drawBackground();
+    drawFire();
+    drawShadow();
+    drawPlayer();
+    drawLighting();
+    drawGlitch();
+
+    ctx.restore();
+    requestAnimationFrame(gameLoop);
+}
+
+function initAudio(){
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.value = 40;
+    gain.gain.value = 0.02;
+    oscillator.connect(gain);
+    gain.connect(audioCtx.destination);
+    oscillator.start();
+}
+</script>
+</body.frequency.value = 40;
+    gain.gain.value = 0.02;
+    oscillator.connect(gain);
+    gain.connect(audioCtx.destination);
+    oscillator.start();
+}
+</script>
+</body>
+</html>      <h2>Kitchen Dashboard</h2>
       <div class="order-group" data-status="Pending"></div>
       <div class="order-group" data-status="Preparing"></div>
       <div class="order-group" data-status="Ready"></div>
@@ -344,4 +762,5 @@
     })();
   </script>
 </body>
+
 </html>
